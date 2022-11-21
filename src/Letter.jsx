@@ -1,7 +1,7 @@
 import React from "react";
 import status from "./status";
 
-const Letter = ({ letter }) => {
+const Letter = ({ letter, customClasses }) => {
   return (
     <div className="text-3xl w-max bg-gradient-to-b from-cyan-600 to-blue-600 text-white mr-1 last:mx-0">
       <div
@@ -11,7 +11,7 @@ const Letter = ({ letter }) => {
             : letter.status === status.misplaced
             ? "bg-gradient-to-b from-orange-400 to-orange-500 rounded-full"
             : ""
-        }`}
+        } ${customClasses ? customClasses : ""}`}
       >
         {letter.letter}
       </div>
