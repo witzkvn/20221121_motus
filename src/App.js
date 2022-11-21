@@ -220,7 +220,7 @@ function App() {
             </span>
             , trouvé en{" "}
             <span className="font-bold text-green-700">
-              {round} tour
+              {round + 1} tour
               {round > 1 ? "s" : ""}
             </span>
             .
@@ -247,21 +247,21 @@ function App() {
             <p className="font-bold text-2xl mb-2">Légende :</p>
             <div className="flex items-center mb-1">
               <Letter
-                customClasses={"h-4 w-4"}
+                customSizesClasses={"h-4 w-4"}
                 letter={{ letter: "", status: status.good }}
               />
               <p>Lettre bien placée</p>
             </div>
             <div className="flex items-center mb-1">
               <Letter
-                customClasses={"h-4 w-4"}
+                customSizesClasses={"h-4 w-4"}
                 letter={{ letter: "", status: status.misplaced }}
               />
               <p>Lettre présente mais mal placée</p>
             </div>
             <div className="flex items-center">
               <Letter
-                customClasses={"h-4 w-4"}
+                customSizesClasses={"h-4 w-4"}
                 letter={{ letter: "", status: status.wrong }}
               />
               <p>Mauvaise lettre</p>
