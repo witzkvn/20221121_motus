@@ -180,7 +180,7 @@ function App() {
 
   if (round === 8) {
     return (
-      <div className="h-screen bg-gradient-to-b from-cyan-600 to-blue-600 text-white flex items-center flex-col text-center py-6 px-2 md:justify-center">
+      <div className="h-screen bg-gradient-to-b from-cyan-600 to-blue-600 text-white flex items-center flex-col text-center py-6 px-2">
         <div className="mb-8">
           <h1 className="text-4xl mb-4 font-bold">C'est perdu ...</h1>
           <p>
