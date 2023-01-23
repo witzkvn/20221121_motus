@@ -11,19 +11,24 @@ function App() {
   // TODO : redesign propre
   // TODO : api dictionnaire ?
 
+  // word to guess states
   const [wordToGuess, setWordToGuess] = useState("");
-  const [isWordToGuessOk, setIsWordToGuessOk] = useState(null);
   const [validatedWordToGuess, setValidatedWordToGuess] = useState([]);
   const [validatedWordToGuessCount, setValidatedWordToGuessCount] = useState(
     {}
   );
+
+  // teams states
+  const [teamAdata, setTeamAdata] = useState({ name: "", score: 0 });
+  const [teamBdata, setTeamBdata] = useState({ name: "", score: 0 });
+
+  // round play states
   const [userGuess, setUserGuess] = useState([]);
   const [round, setRound] = useState(0);
   const [isWin, setIsWin] = useState(false);
 
   const resetGame = () => {
     setWordToGuess("");
-    setIsWordToGuessOk(null);
     setValidatedWordToGuess([]);
     setValidatedWordToGuessCount({});
     setUserGuess([]);
@@ -31,7 +36,7 @@ function App() {
     setIsWin(false);
   };
 
-  if (!wordToGuess || !isWordToGuessOk) {
+  if (!wordToGuess) {
     return (
       <Home
         setUserGuess={setUserGuess}
@@ -39,8 +44,10 @@ function App() {
         setValidatedWordToGuessCount={setValidatedWordToGuessCount}
         wordToGuess={wordToGuess}
         setWordToGuess={setWordToGuess}
-        isWordToGuessOk={isWordToGuessOk}
-        setIsWordToGuessOk={setIsWordToGuessOk}
+        setTeamAdata={setTeamAdata}
+        teamAdata={teamAdata}
+        setTeamBdata={setTeamBdata}
+        teamBdata={teamBdata}
       />
     );
   }

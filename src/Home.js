@@ -1,88 +1,93 @@
 import Button from "./Button";
+import getRandomWord from "./getRandomWord";
 import status from "./status";
 
 const Home = ({
   setValidatedWordToGuess,
   setValidatedWordToGuessCount,
   setUserGuess,
-  wordToGuess,
-  setWordToGuess,
-  isWordToGuessOk,
-  setIsWordToGuessOk,
+  setTeamAdata,
+  setTeamBdata,
+  teamAdata,
+  teamBdata,
 }) => {
-  const wordRegex = /^[a-zA-Z]{4,9}$/;
-
-  const checkWordToGuess = (e) => {
+  const setupGame = async (e) => {
     e.preventDefault();
 
-    const isWordOk = wordRegex.test(wordToGuess.trim());
+    const randomWord = await getRandomWord();
+    console.log("🚀 ~ file: Home.js:18 ~ setupGame ~ randomWord", randomWord);
 
-    if (!isWordOk) {
-      console.log("nok");
-      setIsWordToGuessOk(false);
-    } else {
-      setIsWordToGuessOk(true);
-      const wordInArray = wordToGuess.trim().toUpperCase().split("");
-      setValidatedWordToGuess(wordInArray);
+    const wordInArray = randomWord.trim().toUpperCase().split("");
+    setValidatedWordToGuess(wordInArray);
 
-      const count = {};
-      for (const element of wordInArray) {
-        if (count[element]) {
-          count[element] += 1;
-        } else {
-          count[element] = 1;
-        }
+    const count = {};
+    for (const element of wordInArray) {
+      if (count[element]) {
+        count[element] += 1;
+      } else {
+        count[element] = 1;
       }
-      setValidatedWordToGuessCount(count);
+    }
+    setValidatedWordToGuessCount(count);
 
-      const userGuessArray = wordInArray.map((el) => {
-        return {
-          letter: ".",
-          status: status.wrong,
-        };
-      });
-      userGuessArray[0] = {
-        letter: wordInArray[0],
+    const userGuessArray = wordInArray.map((el) => {
+      return {
+        letter: ".",
         status: status.wrong,
       };
-      setUserGuess((prev) => [...prev, userGuessArray]);
-    }
+    });
+    userGuessArray[0] = {
+      letter: wordInArray[0],
+      status: status.wrong,
+    };
+    setUserGuess((prev) => [...prev, userGuessArray]);
   };
 
   return (
     <div className="h-screen bg-gradient-to-b from-cyan-600 to-blue-600 text-white flex items-center flex-col text-center py-6 px-2">
-      <h1 className="mb-6 text-2xl font-bold md:text-3xl">
-        Jouez à{" "}
-        <span className="font-bold text-2xl text-orange-300">Motus</span> !
+      <h1 className="mb-6 text-2xl font-bold uppercase md:text-3xl">
+        Jouez à <span className="font-bold text-orange-400">Motus</span> !
       </h1>
-      <p className="font-bold ">
-        Les autres joueurs doivent fermer les yeux pendant que vous rentrez
-        votre mot 🙈
+      <p className="font-bold">
+        Veuillez choisir un nom pour chaque équipe puis cliquez sur{" "}
+        <span className="text-orange-300">"Lancer le jeu"</span>.
       </p>
+      <p className="font-bold">
+        Un mot aléatoire à deviner compris entre 4 et 9 lettres* sera choisi
+        aléatoirement !
+      </p>
+      <p className="mb-6 text-sm">* Aucun accent ne sera pris en compte</p>
       <form>
-        <label className="block mb-6" htmlFor="word">
-          Entrez un mot constitué uniquement de lettres, de 4 à 9 caractères :
-        </label>
-        <div className="flex flex-col max-w-sm md:justify-center mx-auto md:flex-row">
+        <div className="flex flex-col mb-6">
+          <label className="block mb-1" htmlFor="teamA">
+            Entrez un nom pour la première équipe :
+          </label>
           <input
             className="py-1 px-2 rounded-sm mb-2 text-black md:mb-0 md:mr-2"
             type="text"
-            id="word"
-            placeholder="exemple"
-            onChange={(e) => setWordToGuess(e.target.value)}
-            value={wordToGuess}
+            id="teamA"
+            placeholder="Equipe A"
+            onChange={(e) => setTeamAdata({ name: e.target.value, score: 0 })}
+            value={teamAdata.name}
+            required
           />
-          <Button onClick={checkWordToGuess}>Valider</Button>
         </div>
+        <div className="flex flex-col mb-6">
+          <label className="block mb-1" htmlFor="teamB">
+            Entrez un nom pour la deuxième équipe :
+          </label>
+          <input
+            className="py-1 px-2 rounded-sm mb-2 text-black md:mb-0 md:mr-2"
+            type="text"
+            id="teamB"
+            placeholder="Equipe B"
+            onChange={(e) => setTeamBdata({ name: e.target.value, score: 0 })}
+            value={teamBdata.name}
+            required
+          />
+        </div>
+        <Button onClick={setupGame}>Lancer le jeu</Button>
       </form>
-
-      {isWordToGuessOk === false ? (
-        <div className="bg-red-100 border border-red-400 text-red-500 px-4 py-3 rounded text-sm mt-8">
-          <strong class="font-bold">
-            Le mot à trouver n'est pas valide. Merci d'en essayer un autre.
-          </strong>
-        </div>
-      ) : null}
     </div>
   );
 };
