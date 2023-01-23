@@ -10,6 +10,7 @@ const Home = ({
   setTeamBdata,
   teamAdata,
   teamBdata,
+  setWordToGuess,
 }) => {
   const setupGame = async (e) => {
     e.preventDefault();
@@ -41,6 +42,8 @@ const Home = ({
       status: status.wrong,
     };
     setUserGuess((prev) => [...prev, userGuessArray]);
+
+    setWordToGuess(randomWord);
   };
 
   return (
@@ -57,7 +60,7 @@ const Home = ({
         aléatoirement !
       </p>
       <p className="mb-6 text-sm">* Aucun accent ne sera pris en compte</p>
-      <form>
+      <form onSubmit={setupGame}>
         <div className="flex flex-col mb-6">
           <label className="block mb-1" htmlFor="teamA">
             Entrez un nom pour la première équipe :
@@ -86,7 +89,7 @@ const Home = ({
             required
           />
         </div>
-        <Button onClick={setupGame}>Lancer le jeu</Button>
+        <Button>Lancer le jeu</Button>
       </form>
     </div>
   );
