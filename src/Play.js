@@ -137,35 +137,33 @@ const Play = ({
         {rulesTabOpen ? "Cacher les règles ❌" : "Voir les règles 💡"}
       </div>
       {rulesTabOpen && <Rules />}
-      <div className="grid grid-cols-2 bg-blue-300 rounded-md mb-6">
+      <div className="grid grid-cols-2 w-full bg-gray-300 text-gray-500 rounded-md mb-6">
         <div
           className={`rounded-md p-4 ${
-            isTeamATurn && "border-4 border-blue-500"
+            isTeamATurn && "border-4 border-blue-500 bg-blue-400 text-white"
           }`}
         >
           <div className="font-bold whitespace-nowrap">
             Score équipe {teamAdata.name}
           </div>
           <div className="text-xl">{teamAdata.score}</div>
+          {isTeamATurn && <p className="font-bold mt-2">A ton tour !</p>}
         </div>
         <div
           className={`rounded-md p-4 ${
             !isTeamATurn && "border-4 border-blue-500"
           }`}
         >
-          <div className="font-bold whitespace-nowrap">
+          <div className="font-bold whitespace-nowrap mt-auto">
             Score équipe {teamBdata.name}
           </div>
           <div className="text-xl">{teamBdata.score}</div>
+          {!isTeamATurn && <p className="font-bold mt-2">A ton tour !</p>}
         </div>
       </div>
-      <p className="font-bold text-lg mb-2">
-        C'est au tour de l'équipe{" "}
-        <span className="text-blue-500">
-          {isTeamATurn ? teamAdata.name : teamBdata.name}
-        </span>
-      </p>
-      <p className="mb-6 font-bold">Tour {round + 1}/8</p>
+      <div className="mb-2 font-bold bg-gray-300 w-full p-2 rounded-md">
+        Tour {round + 1}/8
+      </div>
       <div className="mb-6">
         {userGuess.map((guess, index) => {
           if (round > 0 && index === 0) {
