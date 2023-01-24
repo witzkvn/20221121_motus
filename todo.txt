@@ -1,0 +1,3 @@
+- bouton règles qui ouvre popup avec les règles
+- nouvelle ligne avec des points et les lettres bien placées
+- enlever l'écran end et plutôt popup avec perdu et passage équipe suivante, le jeu continue mais équipe suivante

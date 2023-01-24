@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button";
 import Letter from "./Letter";
+import Rules from "./Rules";
 import status from "./status";
 
 const Play = ({
@@ -13,8 +14,22 @@ const Play = ({
   setRound,
   userGuess,
   setUserGuess,
+  setIsTeamATurn,
+  isTeamATurn,
+  setTeamAdata,
+  setTeamBdata,
+  teamAdata,
+  teamBdata,
 }) => {
+  const [rulesTabOpen, setRulesTabOpen] = useState("");
   const [guessValue, setGuessValue] = useState("");
+  const [currentGoodGuessState, setCurrentGoodGuessState] = useState(
+    userGuess[0]
+  );
+
+  useEffect(() => {
+    console.log(currentGoodGuessState);
+  }, [currentGoodGuessState]);
 
   const playRound = (e) => {
     e.preventDefault();
@@ -75,8 +90,33 @@ const Play = ({
     setUserGuess(newArray);
     setGuessValue("");
 
+    // show only goog placed for next try
+    const onlyGoodArray = result.map((letter) => {
+      if (letter.status !== status.good) {
+        return {
+          letter: ".",
+          status: status.wrong,
+        };
+      } else {
+        return letter;
+      }
+    });
+
+    setCurrentGoodGuessState(onlyGoodArray);
+
     if (isWin) {
       setIsWin(true);
+      if (isTeamATurn) {
+        setTeamAdata((prev) => {
+          return { ...prev, score: prev.score + 1 };
+        });
+        setIsTeamATurn(false);
+      } else {
+        setTeamBdata((prev) => {
+          return { ...prev, score: prev.score + 1 };
+        });
+        setIsTeamATurn(true);
+      }
       return;
     }
 
@@ -88,17 +128,65 @@ const Play = ({
   };
 
   return (
-    <div className="App min-h-screen bg-gradient-to-b from-orange-200 to-orange-400 flex items-center flex-col text-center py-6 px-2">
+    <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
       <h1 className="text-4xl mb-4 font-bold">Devinez le mot !</h1>
+      <div
+        onClick={() => setRulesTabOpen((prev) => !prev)}
+        className="cursor-pointer mb-4"
+      >
+        {rulesTabOpen ? "Cacher les règles ❌" : "Voir les règles 💡"}
+      </div>
+      {rulesTabOpen && <Rules />}
+      <div className="grid grid-cols-2 bg-blue-300 rounded-md mb-6">
+        <div
+          className={`rounded-md p-4 ${
+            isTeamATurn && "border-4 border-blue-500"
+          }`}
+        >
+          <div className="font-bold whitespace-nowrap">
+            Score équipe {teamAdata.name}
+          </div>
+          <div className="text-xl">{teamAdata.score}</div>
+        </div>
+        <div
+          className={`rounded-md p-4 ${
+            !isTeamATurn && "border-4 border-blue-500"
+          }`}
+        >
+          <div className="font-bold whitespace-nowrap">
+            Score équipe {teamBdata.name}
+          </div>
+          <div className="text-xl">{teamBdata.score}</div>
+        </div>
+      </div>
+      <p className="font-bold text-lg mb-2">
+        C'est au tour de l'équipe{" "}
+        <span className="text-blue-500">
+          {isTeamATurn ? teamAdata.name : teamBdata.name}
+        </span>
+      </p>
       <p className="mb-6 font-bold">Tour {round + 1}/8</p>
       <div className="mb-6">
-        {userGuess.map((guess, index) => (
-          <div key={`guess-${index}`} className="flex mr-1 mb-1 last:mr-0">
-            {guess.map((letter, index) => (
+        {userGuess.map((guess, index) => {
+          if (round > 0 && index === 0) {
+            return null;
+          } else {
+            return (
+              <div key={`guess-${index}`} className="flex mb-1">
+                {guess.map((letter, index) => (
+                  <Letter key={`letter-${round}-${index}`} letter={letter} />
+                ))}
+              </div>
+            );
+          }
+        })}
+        {round !== 0 && currentGoodGuessState && (
+          <div className="flex mb-1">
+            {currentGoodGuessState.map((letter, index) => (
               <Letter key={`letter-${round}-${index}`} letter={letter} />
             ))}
           </div>
-        ))}
+        )}
       </div>
       {isWin ? (
         <div>
@@ -120,46 +208,17 @@ const Play = ({
           <Button onClick={resetGame}>Rejouer ?</Button>
         </div>
       ) : (
-        <>
-          <form
-            onSubmit={playRound}
-            className="flex flex-col max-w-sm md:justify-center mx-auto md:flex-row"
-          >
-            <input
-              className="uppercase py-1 px-2 rounded-sm mb-2 text-black md:mb-0 md:mr-2"
-              type="text"
-              onChange={(e) => setGuessValue(e.target.value)}
-              value={guessValue}
-              minLength={validatedWordToGuess.length}
-              maxLength={validatedWordToGuess.length}
-            />
-            <Button>Valider ce mot</Button>
-          </form>
-          <div className="mt-6">
-            <p className="font-bold text-2xl mb-2">Légende :</p>
-            <div className="flex items-center mb-1">
-              <Letter
-                customSizesClasses={"h-4 w-4"}
-                letter={{ letter: "", status: status.good }}
-              />
-              <p>Lettre bien placée</p>
-            </div>
-            <div className="flex items-center mb-1">
-              <Letter
-                customSizesClasses={"h-4 w-4"}
-                letter={{ letter: "", status: status.misplaced }}
-              />
-              <p>Lettre présente mais mal placée</p>
-            </div>
-            <div className="flex items-center">
-              <Letter
-                customSizesClasses={"h-4 w-4"}
-                letter={{ letter: "", status: status.wrong }}
-              />
-              <p>Mauvaise lettre</p>
-            </div>
-          </div>
-        </>
+        <form onSubmit={playRound} className="flex flex-col w-full mx-auto">
+          <input
+            className="uppercase p-2 rounded-sm mb-2 block text-black"
+            type="text"
+            onChange={(e) => setGuessValue(e.target.value)}
+            value={guessValue}
+            minLength={validatedWordToGuess.length}
+            maxLength={validatedWordToGuess.length}
+          />
+          <Button>Proposer ce mot</Button>
+        </form>
       )}
     </div>
   );

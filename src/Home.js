@@ -16,7 +16,7 @@ const Home = ({
     e.preventDefault();
 
     const randomWord = await getRandomWord();
-    console.log("🚀 ~ file: Home.js:18 ~ setupGame ~ randomWord", randomWord);
+    console.log("🚀 ~ file: Home.js:19 ~ setupGame ~ randomWord", randomWord);
 
     const wordInArray = randomWord.trim().toUpperCase().split("");
     setValidatedWordToGuess(wordInArray);
@@ -31,6 +31,7 @@ const Home = ({
     }
     setValidatedWordToGuessCount(count);
 
+    // set first value
     const userGuessArray = wordInArray.map((el) => {
       return {
         letter: ".",
