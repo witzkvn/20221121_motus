@@ -1,0 +1,254 @@
+import { useEffect, useState } from "react";
+import Button from "./Button";
+import Letter from "./Letter";
+import Rules from "./Rules";
+import status from "./status";
+
+const Play = ({
+    resetGame,
+    validatedWordToGuess,
+    validatedWordToGuessCount,
+    isWin,
+    setIsWin,
+    round,
+    setRound,
+    userGuess,
+    setUserGuess,
+    setIsTeamATurn,
+    isTeamATurn,
+    setTeamAdata,
+    setTeamBdata,
+    teamAdata,
+    teamBdata,
+}) => {
+    const [rulesTabOpen, setRulesTabOpen] = useState("");
+    const [guessValue, setGuessValue] = useState("");
+    const [currentGoodGuessState, setCurrentGoodGuessState] = useState(
+        userGuess[0]
+    );
+
+    useEffect(() => {
+        if (round === 8) {
+            setIsTeamATurn((prev) => !prev);
+            setRound(0);
+            setUserGuess((prev) => [prev[prev.length - 1]]);
+            // TODO conserver le goodguess actuel, enlever tous les guess précédents ?
+            // TODO ajouter une lettre à l'affichage
+        }
+    }, [round, setIsTeamATurn, setRound, setUserGuess]);
+
+    // TODO au clic sur bouton proposer, remettre input en focus
+    // TODO : longs mots largeur écran central insuffisante, carrés dépasses
+    // TODO gestion re rejouer : ne pas redemander le nom des équipes, conserver les scores et proposer un nouveau mot
+
+    const playRound = (e) => {
+        e.preventDefault();
+
+        const result = validatedWordToGuess.map((el) => undefined);
+        const guessArray = guessValue.trim().toUpperCase().split("");
+
+        const count = {};
+
+        // do good first
+        for (let i = 0; i < validatedWordToGuess.length; i++) {
+            if (guessArray[i] === validatedWordToGuess[i]) {
+                const letterObj = {
+                    letter: guessArray[i],
+                    status: status.good,
+                };
+
+                if (count[letterObj.letter]) {
+                    count[letterObj.letter] += 1;
+                } else {
+                    count[letterObj.letter] = 1;
+                }
+
+                result[i] = letterObj;
+            }
+        }
+
+        // do misplaced then
+        for (let i = 0; i < validatedWordToGuess.length; i++) {
+            if (result[i] !== undefined) continue;
+
+            let newStatus = status.wrong;
+
+            const isLetterCountFull =
+                count[guessArray[i]] >=
+                validatedWordToGuessCount[guessArray[i]];
+
+            if (
+                validatedWordToGuess.includes(guessArray[i]) &&
+                !isLetterCountFull
+            ) {
+                newStatus = status.misplaced;
+            }
+
+            const letterObj = {
+                letter: guessArray[i],
+                status: newStatus,
+            };
+
+            if (count[letterObj.letter]) {
+                count[letterObj.letter] += 1;
+            } else {
+                count[letterObj.letter] = 1;
+            }
+
+            result[i] = letterObj;
+        }
+
+        const isWin = checkWin(result);
+
+        const newArray = [...userGuess, result];
+        setUserGuess(newArray);
+        setGuessValue("");
+
+        let onlyGoodArray = [...currentGoodGuessState];
+        for (let i = 0; i < onlyGoodArray.length; i++) {
+            if (onlyGoodArray[i].status !== status.good) {
+                if (result[i].status === status.good) {
+                    onlyGoodArray[i] = result[i];
+                }
+            }
+        }
+
+        setCurrentGoodGuessState(onlyGoodArray);
+
+        if (isWin) {
+            setIsWin(true);
+            if (isTeamATurn) {
+                setTeamAdata((prev) => {
+                    return { ...prev, score: prev.score + 1 };
+                });
+                setIsTeamATurn(false);
+            } else {
+                setTeamBdata((prev) => {
+                    return { ...prev, score: prev.score + 1 };
+                });
+                setIsTeamATurn(true);
+            }
+            return;
+        }
+
+        setRound((prev) => prev + 1);
+    };
+
+    const checkWin = (array) => {
+        return array.every((el) => el.status === status.good);
+    };
+
+    return (
+        <div className="App min-h-screen flex items-center flex-col text-center py-6 px-2">
+            <h1 className="text-4xl mb-8 font-bold uppercase text-white">
+                Motus ! 🤔
+            </h1>
+            <div
+                onClick={() => setRulesTabOpen((prev) => !prev)}
+                className="cursor-pointer mb-4"
+            >
+                {rulesTabOpen ? "Cacher les règles ❌" : "Voir les règles 💡"}
+            </div>
+            {rulesTabOpen && <Rules />}
+            <div className="grid grid-cols-1 sm:grid-cols-2 w-full bg-gray-300 text-gray-500 rounded-md mb-6">
+                <div
+                    className={`rounded-md p-4 ${
+                        isTeamATurn &&
+                        "border-4 border-blue-500 bg-blue-400 text-white"
+                    }`}
+                >
+                    <div className="font-bold whitespace-nowrap">
+                        Score équipe {teamAdata.name}
+                    </div>
+                    <div className="text-xl">{teamAdata.score}</div>
+                    {isTeamATurn && (
+                        <p className="font-bold mt-2">A ton tour !</p>
+                    )}
+                </div>
+                <div
+                    className={`rounded-md p-4 ${
+                        !isTeamATurn &&
+                        "border-4 border-blue-500 bg-blue-400 text-white"
+                    }`}
+                >
+                    <div className="font-bold whitespace-nowrap mt-auto">
+                        Score équipe {teamBdata.name}
+                    </div>
+                    <div className="text-xl">{teamBdata.score}</div>
+                    {!isTeamATurn && (
+                        <p className="font-bold mt-2">A ton tour !</p>
+                    )}
+                </div>
+            </div>
+            <div className="mb-2 font-bold bg-gray-300 w-full p-2 rounded-md">
+                Tour {round + 1}/8
+            </div>
+            <div className="mb-6">
+                {userGuess.map((guess, index) => {
+                    if (round > 0 && index === 0) {
+                        return null;
+                    } else {
+                        return (
+                            <div key={`guess-${index}`} className="flex mb-1">
+                                {guess.map((letter, index) => (
+                                    <Letter
+                                        key={`letter-${round}-${index}`}
+                                        letter={letter}
+                                    />
+                                ))}
+                            </div>
+                        );
+                    }
+                })}
+                {round !== 0 && currentGoodGuessState && (
+                    <div className="flex mb-1">
+                        {currentGoodGuessState.map((letter, index) => (
+                            <Letter
+                                key={`letter-${round}-${index}`}
+                                letter={letter}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
+            {isWin ? (
+                <div>
+                    <h2 className="text-2xl mb-4 font-bold">
+                        🎉 Vous avez trouvé le mot ! 🎉
+                    </h2>
+                    <p className="mb-6">
+                        Il s'agissait bien de{" "}
+                        <span className="font-bold text-2xl">
+                            {validatedWordToGuess.join("")}
+                        </span>
+                        , trouvé en{" "}
+                        <span className="font-bold text-green-700">
+                            {round + 1} tour
+                            {round > 1 ? "s" : ""}
+                        </span>
+                        .
+                    </p>
+                    <Button onClick={resetGame}>Rejouer ?</Button>
+                </div>
+            ) : (
+                <form
+                    onSubmit={playRound}
+                    className="flex flex-col w-full mx-auto"
+                >
+                    <input
+                        className="uppercase p-2 rounded-sm mb-2 block text-black tracking-widest text-center"
+                        type="text"
+                        onChange={(e) => setGuessValue(e.target.value)}
+                        value={guessValue}
+                        minLength={validatedWordToGuess.length}
+                        maxLength={validatedWordToGuess.length}
+                        required
+                    />
+                    <Button>Proposer ce mot</Button>
+                </form>
+            )}
+        </div>
+    );
+};
+
+export default Play;
